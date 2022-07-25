@@ -3,7 +3,7 @@ import requests
 from operator import itemgetter
 
 
-def get_feedback(rootId, needed_valuation=None):
+def get_feedback(rootId,last_week, needed_valuation=None):
     list_answer = []
     raw_data = {"imtId": rootId, "skip": 0, "take": 30, "order": "dateDesc"}
     url = "https://public-feedbacks.wildberries.ru/api/v1/summary/full"
@@ -44,28 +44,38 @@ def search_rootId(imtId):
             rootId = int(item["root"])
     return rootId
 
-def rating_control(list):
-    five, four, three, two, one = 0, 0, 0, 0, 0
-    for item in list:
+def rating_control(dict):
+    rating_dict = {'five':0, 'four':0, 'three':0, 'two':0, 'one':0}
+    for item in dict:
         if item['rating'] == 5:
-            five += 1
+            rating_dict['five'] += 1
         elif item['rating'] == 4:
-            four += 1
+            rating_dict['four'] += 1
         elif item['rating'] == 3:
-            three += 1
+            rating_dict['three'] += 1
         elif item['rating'] == 2:
-            two += 1
+            rating_dict['two'] += 1
         elif item['rating'] == 1:
-            one += 1
-    return five, four, three, two, one
+            rating_dict['one'] += 1
+    return rating_dict
+
+
+def size_control(dict):
+    size_dict = {'bigger': 0, 'ok': 0, 'smaller': 0}
+    for item in dict:
+        if item['size'] == 'Большемерит':
+            size_dict['bigger'] += 1
+        if item['size'] == 'Соответствует размеру':
+            size_dict['ok'] += 1
+        if item['size'] == 'Маломерит':
+            size_dict['smaller'] += 1
+    return size_dict
+
 
 
 if __name__ == "__main__":
     last_week = [str(dt.datetime.date(dt.datetime.now()) - dt.timedelta(days=1)),str(dt.datetime.date(dt.datetime.now()) - dt.timedelta(days=2)),str(dt.datetime.date(dt.datetime.now()) - dt.timedelta(days=3)),
                  str(dt.datetime.date(dt.datetime.now()) - dt.timedelta(days=4)),str(dt.datetime.date(dt.datetime.now()) - dt.timedelta(days=5)),str(dt.datetime.date(dt.datetime.now()) - dt.timedelta(days=6)),
                  str(dt.datetime.date(dt.datetime.now()) - dt.timedelta(days=7))]
-    spisok = get_feedback(search_rootId(68877131))
-    print(spisok)
-    # print(len((spisok)))
-    print(rating_control(spisok))
-    # print(five,four,three,two,one)
+    spisok = get_feedback(search_rootId(68877131),last_week)
+    print(size_control(spisok))
